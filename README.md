@@ -19,7 +19,7 @@ Pemanfaatan teknologi dan data akurat menjadi kunci dalam memahami pola pencemar
 
 ## Solution Statements
 1. Untuk memahami interaksi antara karbon monoksida (CO) dengan senyawa lainnya, visualisasi data seperti heatmaps dan pair plots akan digunakan untuk menggambarkan korelasi antar fitur. Dengan visualisasi ini, hubungan antara polutan dan faktor lingkungan lainnya dapat dengan jelas diindentifikasi serta membantu dalam mendeteksi pola-pola tersembunyi yang mungkin mempengaruhi kualitas udara. Teknik visualisasi ini akan memberikan gambaran tentang interaksi antar variabel dan bagaimana masing-masing polutan berkontribusi terhadap perubahan kualitas udara.
-2. Untuk mengevaluasi faktor-faktor yang mempengaruhi peningkatan suhu, metrik Mean Absolute Error (MAE) akan digunakan dalam model regresi. MAE akan memberikan gambaran yang jelas tentang seberapa akurat prediksi suhu berdasarkan beberapa faktor. Dengan mengukur kesalahan prediksi, dapat diketahui faktor-faktor mana yang paling berpengaruh terhadap perubahan suhu dan mampu membantu memperbaiki model untuk meningkatkan akurasi dan memberikan solusi yang lebih efektif dalam mitigasi suhu dan polusi udara.
+2. Untuk mengevaluasi faktor-faktor yang mempengaruhi peningkatan suhu, metrik MSE akan digunakan dalam model regresi. MSE akan memberikan gambaran yang jelas tentang seberapa akurat prediksi suhu berdasarkan beberapa faktor. Dengan mengukur kesalahan prediksi, dapat diketahui faktor-faktor mana yang paling berpengaruh terhadap perubahan suhu dan mampu membantu memperbaiki model untuk meningkatkan akurasi dan memberikan solusi yang lebih efektif dalam mitigasi suhu dan polusi udara.
 
 # Data Understanding
 Dataset yang digunakan dalam proyek ini bersumber dari Kaggle dan berfokus pada pemantauan kualitas udara di kawasan perkotaan. Dataset ini terdiri dari 15 kolom yang berisi data hasil pengukuran dari berbagai sensor kimia, yang mengukur konsentrasi polutan udara seperti karbon monoksida (CO), nitrogen oksida (NOx), ozon (O3), dan polutan lainnya. Data dikumpulkan dari perangkat sensor yang ditempatkan di lokasi perkotaan di Italia, dengan periode pengukuran yang mencakup satu tahun, mulai dari Maret 2004 hingga Februari 2005. Dataset ini memberikan informasi penting mengenai respons sensor terhadap konsentrasi polutan, serta variabel lingkungan lainnya seperti suhu dan kelembaban. Dataset ini berisi 9357 data hasil pengukuran per jam dari lima sensor logam oksida kimia yang tertanam dalam perangkat Air Quality Chemical Multisensor Device, yang terletak di area dengan polusi tinggi di sebuah kota Italia. Data yang terekam mencakup konsentrasi rata-rata per jam untuk CO, Hidrokarbon Non-Metanik, Benzena, Nitrogen Oksida (NOx), dan Nitrogen Dioksida (NO2), yang disediakan oleh analyzer referensi bersertifikat. Nilai yang hilang pada dataset ini ditandai dengan nilai -200. Dataset ini dapat diunduh dari Kaggle melalui informasi berikut:
@@ -82,27 +82,29 @@ Deskripsi variabel memberikan pemahaman tentang setiap kolom dalam dataset, term
 
 Data memiliki 9.357 baris untuk setiap kolom, kecuali untuk kolom "AH" yang memiliki 9.356 baris, hal ini menunjukkan bahwa sebagian besar data terisi lengkap. Jenis data dalam kolom ini bervariasi, sebagian besar kolom memiliki tipe data numerik dengan tipe data `float64` untuk pengukuran gas dan kondisi lingkungan seperti suhu dan kelembaban, serta `int64` untuk hasil pengukuran sensor gas tertentu. Kolom "Date" dan "Time" memiliki tipe data `object`.
 
-
-Langkah selanjutnya, kolom "Date" dan "Time" akan dihapus karena tidak relevan. Berikut adalah ringkasan statistik deskriptif dari dataset tersebut.
-
-![Deskripsi Variabel](https://github.com/user-attachments/assets/13c4bdd2-a09d-4647-b733-8a6ccb22feef)
-
-Untuk mempersiapkan analisis, dilakukan beberapa hal berikut.
-1. Menghapus kolom "NMHC(GT)" karena hampir 75% nilainya negatif.
+Langkah selanjutnya, kolom "Date" dan "Time" akan dihapus karena tidak relevan. Penghapusan ini menggunakan fungsi `dropna()`. Selain menghapus kolom tersebut, untuk mempersiapkan analisis dilakukan beberapa hal berikut.
+1. Menghapus kolom "NMHC(GT)" karena hampir 75% nilainya negatif. 
 2. Indikator senyawa pada dataset  tidak mungkin bernilai negatif, sehingga data yang bernilai negatif dihapus kecuali pada data temperatur.
 
+Berikut adalah ringkasan statistik deskriptif dari dataset yang sudah dilakukan pembersihan nilai negatif.
+
+![Deskripsi Variabel](https://github.com/user-attachments/assets/ba225f5a-92cb-4f10-bebe-e491a41e5285)
+
+
 ### Missing Value dan Outliers
-Berdasarkan deskripsi variabel sebelumnya, terdapat data yang bernilai, untuk itu dilakukan penghapusan  data tersebut menggunakan fungsi `dropna()`. Berikut adalah kondisi data setelah nilai kosong dihapus.
+Berdasarkan deskripsi variabel sebelumnya, terdapat data yang bernilai null, untuk itu perlu dicek kembali apakah setelah dilakukan pembersihan sebelumnya masih terdapat missing value. Pengecekan dilakukan menggunakan fungsi `isna().sum()`. Setelah dicek, sudah tidak terdapat missing value pada dataset
 
 <img src="https://github.com/user-attachments/assets/8ca5df61-9351-4b3e-ad57-daa4ca0e6d9a" alt="Missing Value" width="300">
 
-Data tersebut berkurang dari yang sebelumnya berjumlah 9357 menjadi 6941 karena penghapusan data kosong.
+Data tersebut berkurang dari yang sebelumnya berjumlah 9357 menjadi 6941 karena data yang bernilai negatif sudah dibersihkan.
 
-Selanjutnya, untuk mengidentifikasi keberadaan outliers, digunakan visualisasi menggunakan box plot
+Selanjutnya, untuk mengidentifikasi keberadaan outliers, digunakan visualisasi menggunakan box plot. Boxplot bekerja dengan menggambarkan distribusi data melalui lima angka penting, diantaranya nilai minimum, kuartil pertama (Q1), median (Q2), kuartil ketiga (Q3), dan nilai maksimum. Outlier diidentifikasi sebagai data yang berada di luar rentang interkuartil (IQR), yaitu Q3 − Q1, biasanya lebih kecil dari Q1 − 1.5×IQR atau lebih besar dari Q3 + 1.5×IQR. 
 
 ![Boxplot](https://github.com/user-attachments/assets/a8aa1e50-38ea-489a-9812-bd9dfcb60a6d)
 
-Boxplot di atas menunjukkan adanya outliers pada masing-masing fitur, sehingga perlu dilakukan penanganan untuk memastikan model yang dibangun tidak terpengaruh oleh data yang ekstrem. Penanganan outliers dapat dilakukan dengan menghapus data yang mengandung outlier. Untuk menghapus data outlier, digunakan metode IQR dengan cara menghapus data yang berada di luar rentang IQR yang dihitung dari kuartil pertama (Q1) dan kuartil ketiga (Q3)
+Boxplot di atas menunjukkan adanya outliers pada masing-masing fitur, sehingga perlu dilakukan penanganan untuk memastikan model yang dibangun tidak terpengaruh oleh data yang ekstrem. Penanganan outliers dapat dilakukan dengan menghapus data yang mengandung outlier. Untuk menghapus data outlier, digunakan metode IQR dengan cara menghapus data yang berada di luar rentang IQR yang dihitung dari kuartil pertama (Q1) dan kuartil ketiga (Q3). Setelah outlier dihapus menggunakan metode IQR, data yang sebelumnya berjumlah 6941 berkurang menjadi 6222.
+
+<img src="https://github.com/user-attachments/assets/8537a275-889d-4311-8aac-10d5010b0c65" alt="IQR" width="600">
 
 ### Univariate Analysis
 Analisis univariate pada kasus dilakukan dengan menggunakan histogram untuk setiap fitur dalam dataset. Histogram akan memberikan gambaran visual mengenai distribusi data di setiap kolom yang membantu memahami pola dan sebaran nilai pada setiap fitur. Melalui histogram, data dapat diindentifikasi apakah terdistribusi secara normal, memiliki distribusi miring (skewed), atau terdapat outlier yang perlu diperhatikan. 
@@ -137,11 +139,8 @@ Data preparation dilakukan untuk memastikan model machine learning tidak mengala
 
 Data preparation yang dilakukan pada kasus ini hanya berupa train test split, hal ini karena dataset ini tidak mengandung fitur kategori yang digunakan dalam analisis atau variabel kategorikal yang memerlukan encoding, karena semua fitur yang ada adalah numerik. Selain itu, dataset ini tidak menunjukkan indikasi adanya dimensi yang sangat tinggi yang memerlukan pengurangan, sehingga tidak dilakukan reduksi dimensi.
 
-
-**Train-Test-Split**
+## Train-Test-Split
 Dataset dibagi menjadi dua bagian utama, yaitu data latih dan data uji untuk memastikan model yang dikembangkan dapat belajar dari data latih dan diukur kinerjanya menggunakan data uji. Data latih bertujuan untuk mengajari model pola yang terdapat dalam data, sedangkan data uji digunakan untuk mengevaluasi sejauh mana model dapat menggeneralisasi pola tersebut pada data baru yang belum pernah dilihat sebelumnya.
-
-
 
 Berikut langkah-langkah yang dilakukan untuk membagi dataset tersebut.
 1. Menentukan kolom mana yang menjadi target (variabel yang ingin diprediksi) dan kolom mana yang menjadi fitur (variabel yang digunakan untuk prediksi). Dalam hal ini, targetnya adalah kolom "T", sementara fitur adalah semua kolom lainnya.
@@ -162,84 +161,95 @@ Lima algoritma yang akan digunakan, antara lain:
 - Linear Regression
 - Decision Tree
 
-Pada proses pemodelan regresi, tahapan yang dilakukan adalah sebagai berikut:
-1. Mengimport sub modul berbagai model dari package `sklearn`.
-2. Menyiapkan dataset yang telah dibagi sebelumnya menjadi data latih (`X_train` dan `y_train`)  untuk melatih model regresi.
-3. Memilih berbagai algoritma regresi diterapkan, yaitu K-Nearest Neighbor (KNN), Random Forest, AdaBoost, Linear Regression, dan Decision Tree. 
-4. Model-model regresi dilatih menggunakan data latih yang sudah disiapkan sebelumnya dengan fungsi `fit()`.
-
 ### K-Nearest Neighbor
+K-Nearest Neighbors (KNN) adalah salah satu algoritma yang sederhana namun kuat, digunakan untuk masalah klasifikasi dan regresi. Model ini termasuk dalam kategori algoritma instance-based learning atau lazy learning, yang berarti bahwa model ini tidak membangun suatu model atau fungsi yang eksplisit selama proses pelatihan, tetapi menyimpan seluruh dataset pelatihan untuk digunakan pada saat prediksi. Berikut adalah cara kerja dari model ini.
+1. Model KNN dibuat dengan menggunakan kelas `KNeighborsRegressor`. Kelas ini digunakan untuk tugas regresi, di mana model akan memprediksi nilai numerik berdasarkan kedekatannya dengan data lain.
+2. Model KNN dilatih menggunakan data pelatihan yang disediakan, yaitu `X_train` (fitur atau atribut) dan `y_train` (nilai target atau label). Pada tahap ini, model tidak benar-benar "belajar" seperti pada algoritma lain. KNN hanya menyimpan data pelatihan dan menggunakannya nanti untuk melakukan prediksi.
+3. Setelah model dilatih, model akan memprediksi nilai untuk data pelatihan itu sendiri. Prediksi ini dilakukan dengan mencari tetangga terdekat dari setiap titik data pelatihan dalam ruang fitur, dan nilai target yang diprediksi adalah nilai rata-rata dari target tetangga terdekat tersebut.
+4. MSE dihitung dengan cara membandingkan nilai yang diprediksi oleh model terhadap nilai yang sebenarnya di `y_train`, dengan menghitung rata-rata dari kuadrat selisih antara nilai prediksi dan nilai aktual.
+5. Nilai MSE yang dihitung disimpan ke dalam sebuah struktur data seperti `models.loc` untuk dibandingan dengan model lain.
+
+|Kelebihan | Kekurangan |
+| ------ | ------ |
+| - Sederhana dan mudah dipahami. | - Performa menurun pada dataset besar. | 
+| - Tidak memerlukan asumsi distribusi data. | - Rentan terhadap noise dan outliers. | 
+| - Bisa menangani data non-linear dengan baik. | - Membutuhkan banyak memori. | 
+
 Parameter
 - `n_neighbors=10` untuk menentukan banyaknya jumlah neighbors terdekat yang digunakan untuk memprediksi nilai target.
 
-Kelebihan
-- Sederhana dan mudah dipahami.
-- Tidak memerlukan asumsi distribusi data.
-- Bisa menangani data non-linear dengan baik.
-
-Kekurangan
-- Performa menurun pada dataset besar.
-- Rentan terhadap noise dan outliers.
-- Membutuhkan banyak memori.
-
 ### Random Forest
+Random Forest adalah salah satu algoritma machine learning yang digunakan untuk tugas klasifikasi dan regresi. Algoritma ini merupakan ensemble method, yang berarti ia menggabungkan hasil dari banyak model sederhana untuk membuat keputusan yang lebih kuat dan stabil. Berikut adalah cara kerja dari model ini.
+1. Model `RandomForestRegressor` dibuat dengan parameter yang telah ditentukan, seperti jumlah decision trees (`n_estimators`) dan kedalaman maksimum pohon (`max_depth`). Model ini bertujuan untuk memprediksi nilai numerik pada data baru.
+2. Model dilatih dengan menggunakan data pelatihan, yaitu `X_train` (fitur) dan `y_train` (target). Pada proses ini, Random Forest membangun banyak decision trees yang masing-masing dilatih menggunakan subset data yang berbeda.
+3. Setelah dilatih, model akan digunakan untuk memprediksi nilai target pada data pelatihan. Setiap decision trees memberikan prediksi dan Random Forest akan menggabungkan hasil prediksi dari semua pohon untuk menghasilkan prediksi akhir.
+4. Model dievaluasi dengan menghitung Mean Squared Error (MSE), yang mengukur seberapa jauh prediksi model dari nilai yang sebenarnya. MSE dihitung dengan membandingkan hasil prediksi dengan nilai asli dalam data pelatihan (`y_train`).
+
+|Kelebihan | Kekurangan |
+| ------ | ------ |
+| - Mengurangi overfitting dibandingkan dengan desicion trees tunggal. | - Lebih lambat untuk pelatihan dan prediksi.
+| - Dapat menangani data besar dan kompleks dengan baik. | - Kurang interpretatif karena banyaknya pohon yang digunakan.
+
 Parameter
 - `n_estimators=50` mengindikasikan bahwa model akan menggunakan 50 decision trees untuk melakukan prediksi.
 - `max_depth=16` berfungsi membatasi kedalaman setiap decision trees hingga 16 level untuk menjaga kompleksitas dan generalisasi tetap seimbang.
 
-Kelebihan
-- Mengurangi overfitting dibandingkan dengan desicion trees tunggal.
-- Dapat menangani data besar dan kompleks dengan baik.
-
-Kekurangan
-- Lebih lambat untuk pelatihan dan prediksi.
-- Kurang interpretatif karena banyaknya pohon yang digunakan.
-
 ### Boosting Algorithm
+Boosting adalah salah satu teknik ensemble learning yang bertujuan untuk meningkatkan kinerja model dengan menggabungkan hasil dari banyak model yang lebih sederhana untuk menghasilkan model yang lebih kuat. Teknik ini berfokus pada membangun model secara bertahap, di mana setiap model baru berusaha memperbaiki kesalahan yang dibuat oleh model sebelumnya. Berikut adalah cara kerja dari model ini.
+1. Model `AdaBoostRegressor` diinisialisasi dengan parameter seperti `learning_rate` dan `random_state`. `learning rate` mengontrol seberapa besar perubahan yang dilakukan pada setiap iterasi, sedangkan `random_state` memastikan hasil yang konsisten setiap kali model dilatih.
+2. Model dilatih menggunakan data pelatihan yang terdiri dari fitur (`X_train`) dan nilai target (`y_train`). AdaBoost bekerja dengan membangun beberapa model (biasanya decision trees sederhana). Model pertama dilatih pada data pelatihan biasa, tetapi model-model berikutnya dilatih pada data yang lebih sulit atau data yang sebelumnya diprediksi dengan kesalahan lebih besar.
+3. Setiap model yang dibangun dalam proses AdaBoost bertujuan untuk memperbaiki kesalahan yang dibuat oleh model sebelumnya. Dengan kata lain, setiap model baru mencoba memperbaiki kesalahan prediksi yang ada dengan lebih fokus pada data yang sulit diprediksi.
+4. Setelah proses pelatihan selesai, model digunakan untuk memprediksi nilai target pada data pelatihan. Semua prediksi dari setiap model digabungkan untuk menghasilkan prediksi akhir.
+5. Model dievaluasi dengan menghitung Mean Squared Error (MSE), yang mengukur seberapa jauh prediksi model dari nilai yang sebenarnya dalam data pelatihan.
+
+|Kelebihan | Kekurangan |
+| ------ | ------ |
+| - Meningkatkan akurasi model yang lebih lemah. | - Rentan terhadap overfitting jika learning rate terlalu tinggi. | 
+| - Efektif untuk data dengan noise atau ketidakseimbangan. | - Kinerja menurun pada data yang sangat tidak seimbang. | 
+
 Parameter
 - `learning_rate = 0.05` berfungsi mengontrol seberapa besar kontribusi setiap base learner terhadap prediksi akhir. Dengan nilai learning rate 0.05, model akan mengadaptasi pembelajaran dengan langkah yang lebih kecil, mengurangi kemungkinan overfitting.
 - `random_state = 55` untuk memastikan bahwa hasil eksperimen dapat direproduksi dengan cara menetapkan nilai acak yang sama di setiap eksekusi kode. Nilai ini mengontrol aspek acak dalam algoritma agar hasilnya tetap konsisten.
 
-Kelebihan
-- Meningkatkan akurasi model yang lebih lemah.
-- Efektif untuk data dengan noise atau ketidakseimbangan.
-
-Kekurangan
-- Rentan terhadap overfitting jika learning rate terlalu tinggi.
-- Kinerja menurun pada data yang sangat tidak seimbang.
-
 ### Linear Regression
+Linear Regression adalah metode statistika yang digunakan untuk memodelkan hubungan antara satu atau lebih variabel independen (fitur) dengan variabel dependen (target) menggunakan fungsi linier. Pada dasarnya, model ini mencoba untuk menggambarkan hubungan antara variabel-variabel tersebut dengan mencari garis lurus (atau hiperplane dalam dimensi lebih tinggi) yang paling cocok dengan data. Berikut adalah cara kerja dari model ini.
+1. Model `LinearRegression` dari `sklearn.linear_model` diinisialisasi tanpa parameter tambahan. Ini berarti model akan menggunakan metode standar dalam regresi linier.
+2. Model dilatih dengan data pelatihan yang terdiri dari fitur (`X_train`) dan target/label (`y_train`). Proses pelatihan ini bertujuan untuk mencari garis (atau hiperplane pada dimensi lebih tinggi) yang paling sesuai dengan data tersebut.
+3. Selama pelatihan, model mencoba untuk menemukan hubungan linier antara fitur dan target. Artinya, model mencari koefisien atau bobot yang dapat menggambarkan hubungan tersebut dengan cara meminimalkan perbedaan antara nilai yang diprediksi dan nilai sebenarnya.
+4. Setelah pelatihan selesai, model dapat digunakan untuk memprediksi nilai target berdasarkan fitur input (misalnya, `X_train`). Prediksi ini dihitung berdasarkan persamaan linier yang ditemukan selama pelatihan.
+5. Setelah prediksi dilakukan, model dievaluasi dengan menghitung Mean Squared Error (MSE) yang mengukur seberapa besar perbedaan antara prediksi model dan nilai target sebenarnya.
+
+|Kelebihan | Kekurangan |
+| ------ | ------ |
+| - Mudah dipahami dan cepat. | - Tidak efektif untuk data non-linear.
+| - Memberikan interpretasi yang jelas tentang hubungan antara fitur dan target. | - Rentan terhadap outliers.
+
 Parameter
 - Tidak ada parameter tambahan yang diberi nilai dalam kode untuk model Linear Regression.
 
-Kelebihan
-- Mudah dipahami dan cepat.
-- Memberikan interpretasi yang jelas tentang hubungan antara fitur dan target.
-
-Kekurangan
-- Tidak efektif untuk data non-linear.
-- Rentan terhadap outliers.
-
 ### Decision Tree
+Decision Tree adalah algoritma pembelajaran mesin yang digunakan untuk klasifikasi dan regresi. Model ini membangun struktur seperti pohon yang membuat keputusan berdasarkan serangkaian aturan yang diperoleh dari data. Setiap cabang pohon mewakili keputusan berdasarkan fitur tertentu, dan setiap daun mewakili nilai prediksi atau keputusan akhir. Berikut adalah cara kerja dari model ini.
+1. Model `DecisionTreeRegressor` diinisialisasi dengan parameter seperti `max_depth` yang membatasi kedalaman decision tree dan `random_state` untuk memastikan hasil yang dapat direproduksi.
+2. Model dilatih menggunakan data pelatihan yang terdiri dari fitur (`X_train`) dan target/label (`y_train`). Selama pelatihan, model membangun struktur decision tree.
+3. Model membagi dataset ke dalam subset yang lebih kecil dengan memilih fitur dan nilai terbaik untuk membagi data pada setiap node pohon. Proses ini terus berlanjut hingga tercapai kedalaman maksimum yang telah ditentukan (`max_depth`) atau sampai pembagian data tidak lagi memberikan peningkatan dalam model.
+4. Setelah decision tree dibangun, model dapat digunakan untuk memprediksi nilai target untuk data baru. Model mengarahkan data melalui cabang pohon berdasarkan nilai fitur yang ada, dan sampai pada daun yang memberikan nilai prediksi.
+5. Setelah prediksi dilakukan, model dievaluasi dengan menghitung Mean Squared Error (MSE), yang mengukur perbedaan antara prediksi model dan nilai target sebenarnya.
+
+|Kelebihan | Kekurangan |
+| ------ | ------ |
+| - Mudah dipahami dan diinterpretasikan. | - Rentan terhadap overfitting, terutama jika pohon terlalu dalam.
+| - Dapat menangani data numerik dan kategorikal. | - Kurang stabil, perubahan kecil pada data dapat menghasilkan pohon yang berbeda.
+
 Parameter
 - `max_depth = 16`, seperti pada Random Forest, parameter ini membatasi kedalaman decision trees hingga 16 level.
 - `random_state = 55`, sama seperti pada Boosting, parameter ini mengontrol aspek acak dalam pembuatan decision trees, sehingga hasilnya bisa direplikasi di masa depan.
-
-
-Kelebihan
-- Mudah dipahami dan diinterpretasikan.
-- Dapat menangani data numerik dan kategorikal.
-
-Kekurangan
-- Rentan terhadap overfitting, terutama jika pohon terlalu dalam.
-- Kurang stabil, perubahan kecil pada data dapat menghasilkan pohon yang berbeda.
 
 # Evaluation
 Metrik yang akan digunakan pada evaluasi ini adalah MSE atau Mean Squared Error yang menghitung jumlah selisih kuadrat rata-rata nilai sebenarnya dengan nilai prediksi. MSE pada kasus ini digunakan untuk mengevaluasi kinerja lima model regresi yang diterapkan pada data temperatur.
 
 **Formula MSE**
 
-![Formula MSE](https://github.com/user-attachments/assets/eebc4db3-c3e1-481f-9c9b-2de83e1eb686)
+<img src="https://github.com/user-attachments/assets/eebc4db3-c3e1-481f-9c9b-2de83e1eb686" alt="Formula MSE" width="300">
 
 Keterangan
 - n adalah jumlah data
@@ -270,6 +280,20 @@ MSE yang dihitung untuk masing-masing model pada data latih dan data uji memberi
 ![Prediksi MSE](https://github.com/user-attachments/assets/f8cd956b-87ef-4cfa-b333-7b5f5f378301)
 
 Pada contoh prediksi untuk 3 data uji (seperti yang ditampilkan dalam tabel), model yang menggunakan Random Forest (RF) menghasilkan nilai prediksi yang lebih mendekati nilai aktual dibandingkan dengan model-model lainnya, yang semakin mengkonfirmasi bahwa RF adalah model terbaik yang dipilih berdasarkan hasil MSE terendah.
+
+Berikut adalah hasil evaluasi terhadap Business Understanding.
+
+**Problem Statement**
+1. Model yang telah dibangun seperti Random Forest (RF) menunjukkan prediksi paling akurat yang dapat memberikan wawasan tentang pola-pola temperatur yang mungkin dipengaruhi oleh polutan seperti CO, NOx, dan O3. Hasil ini bisa digunakan sebagai dasar untuk melakukan analisis lebih lanjut mengenai hubungan antara polutan dengan suhu dan kualitas udara.
+2. Model regresi yang dievaluasi seperti Random Forest dan Decision Tree memberikan prediksi suhu yang cukup akurat dan ini berkaitan langsung dengan pemahaman faktor-faktor yang mempengaruhi suhu. Metrik MSE yang kecil pada model Random Forest menunjukkan bahwa model dapat memberikan prediksi suhu yang lebih baik yang sangat relevan dengan upaya mengidentifikasi faktor-faktor yang mempengaruhi suhu. Oleh karena itu, model ini membantu dalam memahami faktor-faktor yang perlu diperhatikan dalam perencanaan kebijakan untuk mitigasi suhu dan polusi.
+
+**Goals**
+1. Visualisasi data seperti heatmaps dan pair plots yang digunakan dalam analisis dapat membantu memahami hubungan antar variabel. Hal ini bisa memberikan gambaran yang lebih jelas tentang bagaimana masing-masing polutan berkontribusi terhadap kualitas udara.
+2. Random Forest memberikan gambaran yang lebih jelas mengenai faktor-faktor yang mempengaruhi suhu dengan MSE yang rendah. Ini menunjukkan bahwa model tersebut dapat memberikan informasi yang berguna dalam perencanaan kebijakan lingkungan, karena hasil prediksi yang lebih akurat memungkinkan pembuat kebijakan untuk mengidentifikasi variabel yang berkontribusi besar terhadap peningkatan suhu dan polusi udara.
+
+**Solution Statements**
+1. Solusi berupa penggunaan visualisasi data seperti heatmaps dan pair plots akan sangat berguna untuk menggambarkan pola-pola antara polutan dan variabel lain yang mempengaruhi kualitas udara. Hasil evaluasi model, terutama Random Forest, yang menunjukkan prediksi yang akurat, dapat memperkuat visualisasi tersebut dengan memberikan data yang lebih terpercaya untuk dianalisis.
+2. Penggunaan MSE untuk mengevaluasi faktor-faktor yang mempengaruhi suhu telah terbukti efektif, terutama dengan model Random Forest yang menghasilkan nilai MSE terendah. Ini menunjukkan bahwa solusi yang direncanakan berdampak dalam memberikan prediksi suhu yang lebih akurat, yang dapat digunakan dalam perencanaan kebijakan lingkungan dan pengendalian polusi. 
 
 [Billions of People Still Breathe Unhealthy Air]: <https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data>
 [Air-Quality]: <https://www.kaggle.com/datasets/citrahsagala/airquality>
