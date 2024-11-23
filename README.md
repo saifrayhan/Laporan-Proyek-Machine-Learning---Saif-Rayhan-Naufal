@@ -56,7 +56,7 @@ Pada tahap ini, langkah pertama yang dilakukan adalah mengimpor library yang dip
 ![Data Loading](https://github.com/user-attachments/assets/f92a3f6c-a77d-47ff-aa45-93d310e45f6a)
 
 ## Exploratory Data Analysis
-Exploratory Data Analysis (EDA) adalah tahap untuk memahami struktur dan pola dalam dataset sebelum melakukan analisis lebih lanjut. Pada kasus kualitas udara ini, EDA bertujuan untuk memeriksa distribusi setiap kolom data, seperti konsentrasi polutan dan faktor lingkungan, serta mengidentifikasi potensi masalah seperti outliers, missing values, atau data yang tidak relevan. Dengan melakukan visualisasi dan perhitungan statistik deskriptif, EDA membantu dalam memahami hubungan antar variabel. Proses ini juga memungkinkan untuk membersihkan data, mengatasi nilai yang hilang, dan menyaring data yang tidak konsisten, sehingga memberikan dasar yang kuat untuk analisis lebih lanjut dan pemodelan yang akurat.
+Exploratory Data Analysis (EDA) adalah tahap untuk memahami struktur dan pola dalam dataset sebelum melakukan analisis lebih lanjut. Pada kasus kualitas udara ini, EDA bertujuan untuk memeriksa distribusi setiap kolom data, seperti konsentrasi polutan dan faktor lingkungan, serta mengidentifikasi potensi masalah seperti outliers, missing values, atau data yang tidak relevan. Dengan melakukan visualisasi dan perhitungan statistik deskriptif, EDA membantu dalam memahami hubungan antar variabel.
 
 ### Deskripsi Variabel
 
@@ -82,32 +82,54 @@ Deskripsi variabel memberikan pemahaman tentang setiap kolom dalam dataset, term
 
 Data memiliki 9.357 baris untuk setiap kolom, kecuali untuk kolom "AH" yang memiliki 9.356 baris, hal ini menunjukkan bahwa sebagian besar data terisi lengkap. Jenis data dalam kolom ini bervariasi, sebagian besar kolom memiliki tipe data numerik dengan tipe data `float64` untuk pengukuran gas dan kondisi lingkungan seperti suhu dan kelembaban, serta `int64` untuk hasil pengukuran sensor gas tertentu. Kolom "Date" dan "Time" memiliki tipe data `object`.
 
-Langkah selanjutnya, kolom "Date" dan "Time" akan dihapus karena tidak relevan. Penghapusan ini menggunakan fungsi `dropna()`. Selain menghapus kolom tersebut, untuk mempersiapkan analisis dilakukan beberapa hal berikut.
-1. Menghapus kolom "NMHC(GT)" karena hampir 75% nilainya negatif. 
-2. Indikator senyawa pada dataset  tidak mungkin bernilai negatif, sehingga data yang bernilai negatif dihapus kecuali pada data temperatur.
+Setelah melihat informasi dataset, selanjutnya dilakukan pengecekan terhadap data menggunakan statistika deskriptif, berikut adalah hasil dari pengecekan data menggunakan fungsi `describe()`.
 
-Berikut adalah ringkasan statistik deskriptif dari dataset yang sudah dilakukan pembersihan nilai negatif.
+![Statistika Deskriptif](https://github.com/user-attachments/assets/2fd49552-4149-4128-bcf9-e84b14868c5c)
 
-![Deskripsi Variabel](https://github.com/user-attachments/assets/ba225f5a-92cb-4f10-bebe-e491a41e5285)
+Berdasarkan pengecekan, data memiliki nilai negatif. Data ini berasal dari hasil pengukuran dan sensor pada alat untuk mengukur kadar polutan, kadar polutan tidak mungkin di bawah 0 sehingga tidak mungkin data tersebut bernilai negatif. Selain itu, informasi dari sumber dataset menyebutkan bahwa nilai negatif ini digunakan sebagai pengganti null. Karena nilai ini dapat mengganggu proses analisis dan modeling, maka pada tahap selanjutnya perlu dilakukan penghapusan nilai negatif.
 
+### Identifikasi Missing Value dan Outliers
 
-### Missing Value dan Outliers
-Berdasarkan deskripsi variabel sebelumnya, terdapat data yang bernilai null, untuk itu perlu dicek kembali apakah setelah dilakukan pembersihan sebelumnya masih terdapat missing value. Pengecekan dilakukan menggunakan fungsi `isna().sum()`. Setelah dicek, sudah tidak terdapat missing value pada dataset
-
-<img src="https://github.com/user-attachments/assets/8ca5df61-9351-4b3e-ad57-daa4ca0e6d9a" alt="Missing Value" width="300">
-
-Data tersebut berkurang dari yang sebelumnya berjumlah 9357 menjadi 6941 karena data yang bernilai negatif sudah dibersihkan.
-
-Selanjutnya, untuk mengidentifikasi keberadaan outliers, digunakan visualisasi menggunakan box plot. Boxplot bekerja dengan menggambarkan distribusi data melalui lima angka penting, diantaranya nilai minimum, kuartil pertama (Q1), median (Q2), kuartil ketiga (Q3), dan nilai maksimum. Outlier diidentifikasi sebagai data yang berada di luar rentang interkuartil (IQR), yaitu Q3 − Q1, biasanya lebih kecil dari Q1 − 1.5×IQR atau lebih besar dari Q3 + 1.5×IQR. 
+Pada info dataset yang sudah ditampilkan sebelumnya, terdapat missing value yang perlu dibersihkan. Selanjutnya, untuk mengidentifikasi keberadaan outliers, digunakan visualisasi menggunakan box plot. Boxplot bekerja dengan menggambarkan distribusi data melalui lima angka penting, diantaranya nilai minimum, kuartil pertama (Q1), median (Q2), kuartil ketiga (Q3), dan nilai maksimum. Outlier diidentifikasi sebagai data yang berada di luar rentang interkuartil (IQR), yaitu Q3 − Q1, biasanya lebih kecil dari Q1 − 1.5×IQR atau lebih besar dari Q3 + 1.5×IQR.
 
 ![Boxplot](https://github.com/user-attachments/assets/a8aa1e50-38ea-489a-9812-bd9dfcb60a6d)
 
-Boxplot di atas menunjukkan adanya outliers pada masing-masing fitur, sehingga perlu dilakukan penanganan untuk memastikan model yang dibangun tidak terpengaruh oleh data yang ekstrem. Penanganan outliers dapat dilakukan dengan menghapus data yang mengandung outlier. Untuk menghapus data outlier, digunakan metode IQR dengan cara menghapus data yang berada di luar rentang IQR yang dihitung dari kuartil pertama (Q1) dan kuartil ketiga (Q3). Setelah outlier dihapus menggunakan metode IQR, data yang sebelumnya berjumlah 6941 berkurang menjadi 6222.
+Selain menggunakan boxplot, outliers juga dapat diidentifikasi menggunakan histogram dengan melihat data yang menjulur pada histogram, data yang terlalu menjulur ke kanan atau ke kiri menandakan adanya outliers pada data tersebut
+
+![Histogram](https://github.com/user-attachments/assets/ceade4ce-c276-4ca8-96cd-b9f733594920)
+
+Boxplot dan histogram di atas menunjukkan bahwa terdapat outliers pada masing-masing fitur, sehingga perlu dilakukan penanganan untuk memastikan model yang dibangun tidak terpengaruh oleh data yang ekstrem.
+
+# Data Preparation
+Proses ini juga memungkinkan untuk membersihkan data, mengatasi nilai yang hilang, dan menyaring data yang tidak konsisten, sehingga memberikan dasar yang kuat untuk analisis lebih lanjut dan pemodelan yang akurat. Data preparation dilakukan untuk memastikan model machine learning tidak mengalami overfitting dan dapat menggeneralisasi dengan baik. Tahap ini memungkinkan model dilatih menggunakan data latih dan dievaluasi menggunakan data uji yang belum pernah dilihat sebelumnya, sehingga memberikan gambaran tentang kinerja model. Selain itu, tahap ini juga memudahkan dalam pemisahan fitur (X) dan target (y), yang penting untuk pelatihan model yang efektif dan evaluasi yang akurat.
+
+Data preparation yang dilakukan pada kasus ini berupa penghapusan fitur, penanganan outliers dan missing value, univariate analysis, multivariate analysis, serta train test split. Dataset ini tidak memiliki fitur kategorikal yang akan dianalisis karena tidak digunakan sehingga akan dihapus dan tidak dilakukan encoding. Selain itu, dataset ini tidak menunjukkan indikasi adanya dimensi yang sangat tinggi yang memerlukan pengurangan, sehingga tidak dilakukan reduksi dimensi.
+
+## Penghapusan Fitur
+
+Penghapusan fitur merupakan langkah penting dalam pra-pemrosesan data untuk meningkatkan kualitas model. Pada tahap ini, kolom "Date" dan "Time" dihapus karena dianggap tidak relevan dengan analisis yang dilakukan, sementara kolom "NMHC(GT)" dihapus karena lebih dari 75% datanya berisi nilai negatif, yang bisa mengurangi kualitas model. Penghapusan fitur yang tidak relevan atau memiliki data yang buruk membantu menyederhanakan dataset, meningkatkan fokus pada fitur yang lebih informatif, dan mengurangi risiko overfitting. Setelah penghapusan tersebut, dataset yang semula terdiri dari 15 kolom kini hanya memiliki 12 kolom.
+
+## Penghapusan Nilai Negatif
+
+Pada dataset ini, nilai negatif pada indikator senyawa tidak mungkin terjadi karena sifat fisik dan kimia dari senyawa tersebut, sehingga baris dengan nilai negatif pada kolom-kolom tersebut dihapus untuk menjaga integritas data. Namun, nilai negatif pada data temperatur masih dianggap valid, karena dalam beberapa kondisi, temperatur dapat bernilai negatif, seperti pada pengukuran suhu di bawah titik beku. Setelah pembersihan data, dilakukan analisis statistik deskriptif untuk menggambarkan distribusi data yang tersisa, termasuk rata-rata, median, standar deviasi, dan nilai maksimum/minimum untuk memastikan bahwa dataset telah bersih dari anomali yang dapat memengaruhi hasil analisis atau model yang akan dibangun.
+
+![Deskripsi Variabel](https://github.com/user-attachments/assets/ba225f5a-92cb-4f10-bebe-e491a41e5285)
+
+Hasil menunjukkan tidak ada nilai negatif pada senyawa polutan setelah dibersihkan dan hanya ada nilai negatif pada temperatur karena wajar jika terdapat suhu dibawah 0 derajat. Selain itu, nilai negatif yang ada pada temperatur juga masih dalam batas wajar suhu di muka bumi.
+
+## Penanganan Missing Value dan Outliers
+
+Berdasarkan deskripsi variabel sebelumnya, terdapat data yang bernilai null, untuk itu perlu dicek kembali apakah setelah dilakukan pembersihan sebelumnya masih terdapat missing value. Pengecekan ini dapat dilakukan dengan menggunakan fungsi `isna()` yang akan mengembalikan nilai boolean (True/False) untuk setiap elemen dalam dataset, dimana True menunjukkan adanya nilai null atau kosong. Fungsi `sum()` kemudian digunakan untuk menghitung jumlah nilai True pada setiap kolom, yang menunjukkan jumlah missing value yang ada di masing-masing kolom. Setelah dicek, sudah tidak terdapat missing value pada dataset setelah dilakukan pembersihan data bernilai negatif. Data tersebut berkurang dari yang sebelumnya berjumlah 9357 menjadi 6941 karena data yang bernilai negatif sudah dibersihkan.
+
+<img src="https://github.com/user-attachments/assets/8ca5df61-9351-4b3e-ad57-daa4ca0e6d9a" alt="Missing Value" width="300">
+
+Penanganan outliers dapat dilakukan dengan menghapus data yang mengandung outlier. Untuk menghapus data outlier, digunakan metode IQR dengan cara menghapus data yang berada di luar rentang IQR yang dihitung dari kuartil pertama (Q1) dan kuartil ketiga (Q3). Setelah outlier dihapus menggunakan metode IQR, data yang sebelumnya berjumlah 6941 berkurang menjadi 6222 yang menandakan bahwa nilai outlier sudah dihapus
 
 <img src="https://github.com/user-attachments/assets/8537a275-889d-4311-8aac-10d5010b0c65" alt="IQR" width="600">
 
-### Univariate Analysis
-Analisis univariate pada kasus dilakukan dengan menggunakan histogram untuk setiap fitur dalam dataset. Histogram akan memberikan gambaran visual mengenai distribusi data di setiap kolom yang membantu memahami pola dan sebaran nilai pada setiap fitur. Melalui histogram, data dapat diindentifikasi apakah terdistribusi secara normal, memiliki distribusi miring (skewed), atau terdapat outlier yang perlu diperhatikan. 
+## Univariate Analysis
+
+Analisis univariate pada kasus dilakukan dengan menggunakan histogram untuk setiap fitur dalam dataset. Histogram akan memberikan gambaran visual mengenai distribusi data di setiap kolom yang membantu memahami pola dan sebaran nilai pada setiap fitur. Melalui histogram, data dapat diindentifikasi apakah terdistribusi secara normal atau memiliki distribusi miring (skewed). Pada tahap sebelumnya, histogram menunjukkan terdapat outliers dan masih belum menggambarkan distibusi data. Setelah dilakukan pembersihan data, histogram sudah menunjukkan adanya distribusi pada masing-masing fitur.
 
 ![Histogram](https://github.com/user-attachments/assets/2d599b46-91af-4645-89aa-617ab8606162)
 
@@ -115,8 +137,8 @@ Berdasarkan visualisasi di atas, diperoleh beberapa informasi berikut.
 1. Setiap fitur memiliki distribusi yang berbeda. Sebagai contoh, beberapa fitur seperti "C6H6(GT)" dan "NOx(GT)" menunjukkan distribusi yang miring ke kanan, hal ini berarti lebih banyak data bernilai kecil dibanding data yang bernilai besar, semisal pada C6H6(GT) menunjukkan bahwa semakin tinggi kadar benzena, semakin jarang peristiwa tersebut terjadi.
 2. Beberapa senyawa seperti "PT08.S4(NO2)" dan "RH" menunjukkan distribusi yang lebih simetris, menunjukkan data terdistribusi secara normal berbentuk seperti lonceng. Artinya, sebagian besar data terpusat di sekitar nilai tengah (mean), dan semakin sedikit data yang jauh dari nilai tengah tersebut.
 
+## Multivariate Analysis
 
-### Multivariate Analysis
 Multivariate Analysis adalah teknik analisis yang digunakan untuk melihat hubungan antara lebih dari dua variabel secara bersamaan. Pengukuran ini berfungsi untuk memahami kualitas udara dan faktor-faktor seperti suhu, kelembapan, dan konsentrasi polutan (CO, NOx, C6H6, dll.) saling berinteraksi satu sama lain dan mempengaruhi fenomena tertentu. Multivariate analysis pada kasus ini menggunakan dua pendekatan, yakni menggunakan pair plot dan heatmap
 
 #### Pair Plot
@@ -132,12 +154,6 @@ Berdasarkan kedua visualisasi di atas yang menggambarkan korelasi antar variabel
     - NO2 merupakan penyumbang utama dalam pembentukan ozon yang memiliki efek pemanasan pada atmosfer. Saat temperatur meningkat, reaksi kimia yang melibatkan NO2 menjadi lebih cepat, mempercepat pembentukan ozon yang kemudian dapat meningkatkan temperatur.
     - AH (Air Humidity) merupakan salah satu faktor yang sangat berpengaruh terhadap temperatur. Uap air sangat efektif  menyerap dan memerangkap radiasi yang menyebabkan peningkatan temperatur. Ketika AH meningkat, atmosfer menjadi lebih lembab dan cenderung menyimpan lebih banyak energi panas.
 2. Karbon monoksida baik yang diukur langsung menggunakan alat analitik maupun melalui sensor menunjukkan adanya korelai dengan zat lain seperti C6H6, NMHC, NOx, NO2, dan O3. Hal ini terjadi karena senyawa tersebut merupakan zat yang dihasilkan dari proses pembakaran yang tidak sempurna, seperti emisi kendaraan bermotor, aktivitas industri, dan pembakaran bahan bakar fosil. Korelasi ini mencerminkan hubungan antara berbagai polutan dalam memengaruhi kualitas udara.
-
-# Data Preparation
-
-Data preparation dilakukan untuk memastikan model machine learning tidak mengalami overfitting dan dapat menggeneralisasi dengan baik. Tahap ini memungkinkan model dilatih menggunakan data latih dan dievaluasi menggunakan data uji yang belum pernah dilihat sebelumnya, sehingga memberikan gambaran tentang kinerja model. Selain itu, tahap ini juga memudahkan dalam pemisahan fitur (X) dan target (y), yang penting untuk pelatihan model yang efektif dan evaluasi yang akurat.
-
-Data preparation yang dilakukan pada kasus ini hanya berupa train test split, hal ini karena dataset ini tidak mengandung fitur kategori yang digunakan dalam analisis atau variabel kategorikal yang memerlukan encoding, karena semua fitur yang ada adalah numerik. Selain itu, dataset ini tidak menunjukkan indikasi adanya dimensi yang sangat tinggi yang memerlukan pengurangan, sehingga tidak dilakukan reduksi dimensi.
 
 ## Train-Test-Split
 Dataset dibagi menjadi dua bagian utama, yaitu data latih dan data uji untuk memastikan model yang dikembangkan dapat belajar dari data latih dan diukur kinerjanya menggunakan data uji. Data latih bertujuan untuk mengajari model pola yang terdapat dalam data, sedangkan data uji digunakan untuk mengevaluasi sejauh mana model dapat menggeneralisasi pola tersebut pada data baru yang belum pernah dilihat sebelumnya.
