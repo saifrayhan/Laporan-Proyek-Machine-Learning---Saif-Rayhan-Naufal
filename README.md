@@ -4,7 +4,7 @@
 ![Gambar Cover](https://st3.depositphotos.com/10665628/34984/v/450/depositphotos_349840932-stock-illustration-air-pollution-vector-illustration-factories.jpg)
 
 # Domain Proyek
-Pemanasan global dan pencemaran udara telah menjadi isu mendesak yang memengaruhi berbagai aspek kehidupan manusia. Peningkatan suhu bumi akibat emisi gas rumah kaca dari aktivitas manusia, seperti transportasi, pembakaran bahan bakar fosil, dan industri, telah memperburuk kualitas udara, terutama di kawasan perkotaan. Polutan seperti karbon monoksida (CO), benzena (C6H6), nitrogen oksida (NOx), dan ozon (O3) berdampak serius pada kesehatan manusia dan ekosistem. Data dari Organisasi Kesehatan Dunia (WHO) menunjukkan bahwa 91% populasi dunia tinggal di wilayah dengan kualitas udara buruk, yang menyebabkan sekitar 7 juta kematian setiap tahun akibat penyakit terkait polusi udara (_[Billions of People Still Breathe Unhealthy Air]_). Kondisi ini menandakan pentingnya langkah untuk mengidentifikasi, memantau, dan mengurangi pencemaran udara agar menciptakan lingkungan yang lebih sehat dan berkelanjutan.
+Pemanasan global dan pencemaran udara telah menjadi isu mendesak yang memengaruhi berbagai aspek kehidupan manusia. Peningkatan suhu bumi akibat emisi gas rumah kaca dari aktivitas manusia, seperti transportasi, pembakaran bahan bakar fosil, dan industri, telah memperburuk kualitas udara, terutama di kawasan perkotaan. Polutan seperti karbon monoksida (CO), benzena (C6H6), nitrogen oksida (NOx), dan ozon (O3) berdampak serius pada kesehatan manusia dan ekosistem. Data dari Organisasi Kesehatan Dunia (WHO) menunjukkan bahwa 91% populasi dunia tinggal di wilayah dengan kualitas udara buruk, yang menyebabkan sekitar 7 juta kematian setiap tahun akibat penyakit terkait polusi udara (_[WHO, 2022]_). Kondisi ini menandakan pentingnya langkah untuk mengidentifikasi, memantau, dan mengurangi pencemaran udara agar menciptakan lingkungan yang lebih sehat dan berkelanjutan.
 
 Pemanfaatan teknologi dan data akurat menjadi kunci dalam memahami pola pencemaran dan menganalisis tren jangka panjang. Dengan data berkualitas, para peneliti dan pembuat kebijakan dapat mengambil keputusan berbasis bukti ilmiah untuk mengurangi dampak buruk polusi udara. Selain itu, pengembangan model prediktif menggunakan machine learning dan metode pengolahan data yang baik dapat memberikan solusi yang lebih terarah dalam upaya mitigasi. Langkah ini tidak hanya membantu meningkatkan kualitas penelitian lingkungan, tetapi juga memperkuat fondasi pengambilan keputusan strategis di tingkat lokal dan global.
 
@@ -306,8 +306,13 @@ Berikut adalah hasil evaluasi terhadap Business Understanding.
 
 **Solution Statements**
 1. Solusi berupa penggunaan visualisasi data seperti heatmaps dan pair plots akan sangat berguna untuk menggambarkan pola-pola antara polutan dan variabel lain yang mempengaruhi kualitas udara. Hasil evaluasi model, terutama Random Forest, yang menunjukkan prediksi yang akurat, dapat memperkuat visualisasi tersebut dengan memberikan data yang lebih terpercaya untuk dianalisis.
-2. Penggunaan MSE untuk mengevaluasi faktor-faktor yang mempengaruhi suhu telah terbukti efektif, terutama dengan model Random Forest yang menghasilkan nilai MSE terendah. Ini menunjukkan bahwa solusi yang direncanakan berdampak dalam memberikan prediksi suhu yang lebih akurat, yang dapat digunakan dalam perencanaan kebijakan lingkungan dan pengendalian polusi. 
+2. Penggunaan MSE untuk mengevaluasi faktor-faktor yang mempengaruhi suhu telah terbukti efektif, terutama dengan model Random Forest yang menghasilkan nilai MSE terendah. Ini menunjukkan bahwa solusi yang direncanakan berdampak dalam memberikan prediksi suhu yang lebih akurat, yang dapat digunakan dalam perencanaan kebijakan lingkungan dan pengendalian polusi.
+
+Referensi
+
+WHO. (2022, April 4). Billions of People Still Breathe Unhealthy Air. _World Health Organization (WHO)_. https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data
 
 [Billions of People Still Breathe Unhealthy Air]: <https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data>
+[WHO, 2022]: <https://www.who.int/news/item/04-04-2022-billions-of-people-still-breathe-unhealthy-air-new-who-data>
 [Air-Quality]: <https://www.kaggle.com/datasets/citrahsagala/airquality>
 [citrahsagala]: <https://www.kaggle.com/citrahsagala>
