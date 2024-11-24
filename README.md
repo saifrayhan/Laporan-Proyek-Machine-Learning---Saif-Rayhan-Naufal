@@ -88,17 +88,42 @@ Setelah melihat informasi dataset, selanjutnya dilakukan pengecekan terhadap dat
 
 Berdasarkan pengecekan, data memiliki nilai negatif. Data ini berasal dari hasil pengukuran dan sensor pada alat untuk mengukur kadar polutan, kadar polutan tidak mungkin di bawah 0 sehingga tidak mungkin data tersebut bernilai negatif. Selain itu, informasi dari sumber dataset menyebutkan bahwa nilai negatif ini digunakan sebagai pengganti null. Karena nilai ini dapat mengganggu proses analisis dan modeling, maka pada tahap selanjutnya perlu dilakukan penghapusan nilai negatif.
 
-### Identifikasi Missing Value dan Outliers
+### Univariate Analysis untuk Identifikasi Missing Value dan Outliers
+
+#### Boxplot
 
 Pada info dataset yang sudah ditampilkan sebelumnya, terdapat missing value yang perlu dibersihkan. Selanjutnya, untuk mengidentifikasi keberadaan outliers, digunakan visualisasi menggunakan box plot. Boxplot bekerja dengan menggambarkan distribusi data melalui lima angka penting, diantaranya nilai minimum, kuartil pertama (Q1), median (Q2), kuartil ketiga (Q3), dan nilai maksimum. Outlier diidentifikasi sebagai data yang berada di luar rentang interkuartil (IQR), yaitu Q3 − Q1, biasanya lebih kecil dari Q1 − 1.5×IQR atau lebih besar dari Q3 + 1.5×IQR.
 
 ![Boxplot](https://github.com/user-attachments/assets/a8aa1e50-38ea-489a-9812-bd9dfcb60a6d)
 
-Selain menggunakan boxplot, outliers juga dapat diidentifikasi menggunakan histogram dengan melihat data yang menjulur pada histogram, data yang terlalu menjulur ke kanan atau ke kiri menandakan adanya outliers pada data tersebut
+#### Histogram
+
+Analisis univariate pada kasus dilakukan dengan menggunakan histogram untuk setiap fitur dalam dataset. Histogram akan memberikan gambaran visual mengenai distribusi data di setiap kolom yang membantu memahami pola dan sebaran nilai pada setiap fitur. Melalui histogram, data dapat diindentifikasi apakah terdistribusi secara normal atau memiliki distribusi miring (skewed). Selain menggunakan boxplot, outliers juga dapat diidentifikasi menggunakan histogram dengan melihat data yang menjulur pada histogram, data yang terlalu menjulur ke kanan atau ke kiri menandakan adanya outliers pada data tersebut.
 
 ![Histogram](https://github.com/user-attachments/assets/ceade4ce-c276-4ca8-96cd-b9f733594920)
 
 Boxplot dan histogram di atas menunjukkan bahwa terdapat outliers pada masing-masing fitur, sehingga perlu dilakukan penanganan untuk memastikan model yang dibangun tidak terpengaruh oleh data yang ekstrem.
+
+### Multivariate Analysis
+
+Multivariate Analysis adalah teknik analisis yang digunakan untuk melihat hubungan antara lebih dari dua variabel secara bersamaan. Pengukuran ini berfungsi untuk memahami kualitas udara dan faktor-faktor seperti suhu, kelembapan, dan konsentrasi polutan (CO, NOx, C6H6, dll.) saling berinteraksi satu sama lain dan mempengaruhi fenomena tertentu. Multivariate analysis pada kasus ini menggunakan dua pendekatan, yakni menggunakan pair plot dan heatmap
+
+#### Pair Plot
+
+![Pair Plot](https://github.com/user-attachments/assets/fa35e1ca-fd75-410b-bd84-e5c88db441ca)
+
+#### Heatmap
+
+![Heatmap](https://github.com/user-attachments/assets/142c66fe-d584-4d1f-a850-c28e75809d88)
+
+Berdasarkan kedua visualisasi di atas yang menggambarkan korelasi antar variabel, diperoleh beberapa informasi sebagai berikut
+1. T dengan C6H6(GT), RH, dan AH memiliki korelasi sangat kuat di atas 0.85, menunjukkan hubungan linear positif yang erat. Korelasi lainnya, seperti dengan PT08.S1(CO) (0.75) dan PT08.S4(NO2) (0.76) mengindikasikan hubungan yang cenderung cukup kuat antara temperatur dengan zat tersebut.
+2. Karbon monoksida baik yang diukur langsung menggunakan alat analitik maupun melalui sensor menunjukkan adanya korelai dengan zat lain seperti C6H6, NMHC, NOx, NO2, dan O3. Hal ini terjadi karena senyawa tersebut merupakan zat yang dihasilkan dari proses pembakaran yang tidak sempurna, seperti emisi kendaraan bermotor, aktivitas industri, dan pembakaran bahan bakar fosil. Korelasi ini mencerminkan hubungan antara berbagai polutan dalam memengaruhi kualitas udara.
+3. PT08.S1(CO), PT08.S2(NMHC), dan PT08.S5(O3) memiliki korelasi positif sangat kuat (0.89 hingga 0.91), menunjukkan hubungan linear erat antar variabel ini.
+4. NMHC(GT) menunjukkan korelasi lemah terhadap sebagian besar variabel, dengan nilai mendekati 0.
+5. Variabel pada diagonal memiliki korelasi sempurna (1) dengan dirinya sendiri, yang wajar karena menggambarkan hubungan variabel dengan dirinya.
+
+Berdasarkan analisis korelasi, ditemukan beberapa fitur yang tidak berkorelasi yang dapat memengaruhi performa model prediktif, sehingga disarankan untuk menghapus salah satu dari fitur tersebut untuk menyederhanakan model. Selain itu, langkah pembersihan data juga perlu dilakukan, seperti menghapus data yang tidak valid, nilai negatif, atau nilai outlier yang dapat memengaruhi kualitas analisis. Dengan melakukan ini, dataset yang dihasilkan akan lebih bersih, relevan, dan siap digunakan dalam proses pemodelan.
 
 # Data Preparation
 Proses ini juga memungkinkan untuk membersihkan data, mengatasi nilai yang hilang, dan menyaring data yang tidak konsisten, sehingga memberikan dasar yang kuat untuk analisis lebih lanjut dan pemodelan yang akurat. Data preparation dilakukan untuk memastikan model machine learning tidak mengalami overfitting dan dapat menggeneralisasi dengan baik. Tahap ini memungkinkan model dilatih menggunakan data latih dan dievaluasi menggunakan data uji yang belum pernah dilihat sebelumnya, sehingga memberikan gambaran tentang kinerja model. Selain itu, tahap ini juga memudahkan dalam pemisahan fitur (X) dan target (y), yang penting untuk pelatihan model yang efektif dan evaluasi yang akurat.
@@ -126,34 +151,6 @@ Berdasarkan deskripsi variabel sebelumnya, terdapat data yang bernilai null, unt
 Penanganan outliers dapat dilakukan dengan menghapus data yang mengandung outlier. Untuk menghapus data outlier, digunakan metode IQR dengan cara menghapus data yang berada di luar rentang IQR yang dihitung dari kuartil pertama (Q1) dan kuartil ketiga (Q3). Setelah outlier dihapus menggunakan metode IQR, data yang sebelumnya berjumlah 6941 berkurang menjadi 6222 yang menandakan bahwa nilai outlier sudah dihapus
 
 <img src="https://github.com/user-attachments/assets/8537a275-889d-4311-8aac-10d5010b0c65" alt="IQR" width="600">
-
-## Univariate Analysis
-
-Analisis univariate pada kasus dilakukan dengan menggunakan histogram untuk setiap fitur dalam dataset. Histogram akan memberikan gambaran visual mengenai distribusi data di setiap kolom yang membantu memahami pola dan sebaran nilai pada setiap fitur. Melalui histogram, data dapat diindentifikasi apakah terdistribusi secara normal atau memiliki distribusi miring (skewed). Pada tahap sebelumnya, histogram menunjukkan terdapat outliers dan masih belum menggambarkan distibusi data. Setelah dilakukan pembersihan data, histogram sudah menunjukkan adanya distribusi pada masing-masing fitur.
-
-![Histogram](https://github.com/user-attachments/assets/2d599b46-91af-4645-89aa-617ab8606162)
-
-Berdasarkan visualisasi di atas, diperoleh beberapa informasi berikut.
-1. Setiap fitur memiliki distribusi yang berbeda. Sebagai contoh, beberapa fitur seperti "C6H6(GT)" dan "NOx(GT)" menunjukkan distribusi yang miring ke kanan, hal ini berarti lebih banyak data bernilai kecil dibanding data yang bernilai besar, semisal pada C6H6(GT) menunjukkan bahwa semakin tinggi kadar benzena, semakin jarang peristiwa tersebut terjadi.
-2. Beberapa senyawa seperti "PT08.S4(NO2)" dan "RH" menunjukkan distribusi yang lebih simetris, menunjukkan data terdistribusi secara normal berbentuk seperti lonceng. Artinya, sebagian besar data terpusat di sekitar nilai tengah (mean), dan semakin sedikit data yang jauh dari nilai tengah tersebut.
-
-## Multivariate Analysis
-
-Multivariate Analysis adalah teknik analisis yang digunakan untuk melihat hubungan antara lebih dari dua variabel secara bersamaan. Pengukuran ini berfungsi untuk memahami kualitas udara dan faktor-faktor seperti suhu, kelembapan, dan konsentrasi polutan (CO, NOx, C6H6, dll.) saling berinteraksi satu sama lain dan mempengaruhi fenomena tertentu. Multivariate analysis pada kasus ini menggunakan dua pendekatan, yakni menggunakan pair plot dan heatmap
-
-#### Pair Plot
-
-![Pair Plot](https://github.com/user-attachments/assets/8599722e-b5d4-499a-a5dd-d60c4d239e03)
-
-#### Heatmap
-
-![Heatmap](https://github.com/user-attachments/assets/b8d8e326-3519-49c6-9e05-aad5f50b84e5)
-
-Berdasarkan kedua visualisasi di atas yang menggambarkan korelasi antar variabel, diperoleh beberapa informasi sebagai berikut
-1. Terdapat korelasi sebesar 0.63 antara temperatur dengan pengukuran NO2 menggunakan sensor  perangkat Air Quality Chemical Multisensor System. Selain itu, terdapat korelasi antara temperatur dengan Air Humidity sebesar 0.66.
-    - NO2 merupakan penyumbang utama dalam pembentukan ozon yang memiliki efek pemanasan pada atmosfer. Saat temperatur meningkat, reaksi kimia yang melibatkan NO2 menjadi lebih cepat, mempercepat pembentukan ozon yang kemudian dapat meningkatkan temperatur.
-    - AH (Air Humidity) merupakan salah satu faktor yang sangat berpengaruh terhadap temperatur. Uap air sangat efektif  menyerap dan memerangkap radiasi yang menyebabkan peningkatan temperatur. Ketika AH meningkat, atmosfer menjadi lebih lembab dan cenderung menyimpan lebih banyak energi panas.
-2. Karbon monoksida baik yang diukur langsung menggunakan alat analitik maupun melalui sensor menunjukkan adanya korelai dengan zat lain seperti C6H6, NMHC, NOx, NO2, dan O3. Hal ini terjadi karena senyawa tersebut merupakan zat yang dihasilkan dari proses pembakaran yang tidak sempurna, seperti emisi kendaraan bermotor, aktivitas industri, dan pembakaran bahan bakar fosil. Korelasi ini mencerminkan hubungan antara berbagai polutan dalam memengaruhi kualitas udara.
 
 ## Train-Test-Split
 Dataset dibagi menjadi dua bagian utama, yaitu data latih dan data uji untuk memastikan model yang dikembangkan dapat belajar dari data latih dan diukur kinerjanya menggunakan data uji. Data latih bertujuan untuk mengajari model pola yang terdapat dalam data, sedangkan data uji digunakan untuk mengevaluasi sejauh mana model dapat menggeneralisasi pola tersebut pada data baru yang belum pernah dilihat sebelumnya.
