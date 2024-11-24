@@ -88,7 +88,7 @@ Setelah melihat informasi dataset, selanjutnya dilakukan pengecekan terhadap dat
 
 Berdasarkan pengecekan, data memiliki nilai negatif. Data ini berasal dari hasil pengukuran dan sensor pada alat untuk mengukur kadar polutan, kadar polutan tidak mungkin di bawah 0 sehingga tidak mungkin data tersebut bernilai negatif. Selain itu, informasi dari sumber dataset menyebutkan bahwa nilai negatif ini digunakan sebagai pengganti null. Karena nilai ini dapat mengganggu proses analisis dan modeling, maka pada tahap selanjutnya perlu dilakukan penghapusan nilai negatif.
 
-### Univariate Analysis untuk Identifikasi Missing Value dan Outliers
+### Univariate Analysis untuk Identifikasi Outliers
 
 #### Boxplot
 
